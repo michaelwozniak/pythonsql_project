@@ -1,0 +1,24 @@
+{% extends 'layout.html' %}
+
+{% block body%}
+<main role="main" class="inner cover">
+    <br></br>
+        <h3>ALGORITHMS</h3>
+        <p class="lead">
+                My solution is based on two algorithms: pre-trained Convolutional Neural Networks (on ImageNet) in the <b>Inception ResNet V2</b> architecture and <b>Birch</b> clusterization algorithm. Based on the author's academic research, it has been proven that this combination is the most efficient. Inception ResNet V2 architecture allows you to detect many image features, while Birch great perform hierarchical clustering over particularly large data-sets (outperforming: K-Means, PAM and DBSCAN). 
+        </p><br></br>
+        <h3>PIPELINE</h3>
+        <div class="list-group">
+                <a href="#" class="list-group-item list-group-item-action">1. Loading and preprocessing dataset (resizing, dimension expanding, subtracting the mean RGB channels of the ImageNet dataset and etc.)
+                    </a>
+                <a href="#" class="list-group-item list-group-item-action list-group-item-info">2. Loading and applying pre-trained Inception ResNet V2 on data from 1 point to obtain features for each image.
+                    </a>
+                <a href="#" class="list-group-item list-group-item-action">3. Applying Birch model on obtained features from 2 point. It is required to specify number of clusters based on user needs (binary classification: number of clusters is equal to 2, k-class classification: number of clusters is equal to k).
+                    </a>
+                <a href="#" class="list-group-item list-group-item-action list-group-item-info">4. Saving outputs to directory with respect to clusters.                    </a>
+
+              </div>
+    </main>
+
+
+{% endblock %}

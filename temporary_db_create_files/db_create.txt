@@ -1,0 +1,21 @@
+sqlite3 content.db
+
+CREATE TABLE HOME(
+   ID INT PRIMARY KEY     NULL,
+   CONTENT TEXT    NULL
+);
+
+
+INSERT INTO HOME(ID,CONTENT)
+VALUES (0, "Agile semi-automatic image clustering (filtering) using pre-trained Convolutional Neural Networks and clustering algorithms")
+
+
+CREATE TABLE CONTACT(
+   ID INT PRIMARY KEY     NULL,
+   MAIL CHAR NULL,
+   CELL CHAR NULL
+);
+
+
+INSERT INTO CONTACT(ID,MAIL,CELL)
+VALUES (0, "wozniakmichal7@gmail.com", "+48 518-504-403")

@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+
+{% block body%}
+<main role="main" class="inner cover">
+        <h1 class="cover-heading">Contact</h1> 
+        <p class="lead">
+        {% for text in texts %}
+      <h5><b>Mail me:</b> {{text[1]}}</h5>
+       <br>
+      <h5><b>Call me: </b>{{text[2]}}</h5>
+       {% endfor %}</p><i>or</i><br></br>
+       
+       <h5><b>Visit my LinkedIn:</b></h5>
+       <a href="https://www.linkedin.com/in/micha%C5%82-wo%C5%BAniak-0a89ab160/" style="text-decoration: none;color: #92ca55;"><img src="static\img\linkedin.svg" style="height: 100px;"></a>
+
+        <p class="lead">
+        </p>
+    </main>
+
+
+{% endblock %}

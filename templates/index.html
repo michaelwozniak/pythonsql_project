@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+
+{% block body%}
+<main role="main" class="inner cover">
+    <img src="static\img\cleaner.png ", style="height:300px;"><br></br>
+        <h1 class="cover-heading">CV_Cleaner</h1> 
+        <p class="lead">
+        {% for text in texts %}
+       {{text[1]}}
+       {% endfor %}</p>
+
+        <p class="lead">
+        <a href="/features" class="btn btn-lg btn-secondary">Learn more</a>
+        </p>
+    </main>
+
+
+{% endblock %}
