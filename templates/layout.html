@@ -6,7 +6,7 @@
         <meta name="description" content="Free, robust image dataset cleaner">
         <meta name="author" content="Michał Woźniak">
         <title>CV_Clearner</title>
-        <link rel="canonical" href="https://getbootstrap.com/docs/4.4/examples/cover/">
+        <link rel="canonical" href="static\cover.css">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
         <link rel="apple-touch-icon" href="https://getbootstrap.com/docs/4.4/assets/img/favicons/apple-touch-icon.png" sizes="180x180">
         <link rel="icon" href="https://getbootstrap.com/docs/4.4/assets/img/favicons/favicon-32x32.png" sizes="32x32" type="image/png">
@@ -32,7 +32,7 @@
                 }
                 }
             </style>
-           <link href="https://getbootstrap.com/docs/4.4/examples/cover/cover.css" rel="stylesheet">
+           <link href="static\cover.css" rel="stylesheet">
     </head>
     <body class="text-center">
         <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column" >
@@ -42,7 +42,8 @@
                     {% include 'includes/_navbar.html' %}
                     </div>
                 </header>
-                
+                      {% include 'includes/_messages.html' %}
+
                 {% block body %}{% endblock %}
                 
                 <footer class="mastfoot mt-auto">
