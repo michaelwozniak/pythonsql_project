@@ -250,7 +250,17 @@ def creator_img():
     if controller != 0:
         flash('Images added!', 'success')
         time.sleep(2)
-        Model()
+        task = f"create view images_to_model as select img_name from images WHERE project_id = {project_id}"
+        conn.execute("DROP VIEW IF EXISTS images_to_model")
+        conn.execute(task)
+        conn.execute("select * from images_to_model")
+        rows = conn.fetchall()
+        files_list = list()
+        for i in rows:
+            files_list.append(i[0])
+        print(files_list)
+        # cnn_birch_model = Model(files_list)
+        # cnn_birch_model
     
     return render_template('creator_img.html')
 

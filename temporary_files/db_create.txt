@@ -8,7 +8,6 @@ CREATE TABLE HOME(
 INSERT INTO HOME(ID,CONTENT)
 VALUES (0, "Agile semi-automatic image clustering (filtering) using pre-trained Convolutional Neural Networks and clustering algorithms");
 
-
 CREATE TABLE CONTACT(
    ID INT PRIMARY KEY     NULL,
    MAIL CHAR NULL,
@@ -18,13 +17,11 @@ CREATE TABLE CONTACT(
 INSERT INTO CONTACT(ID,MAIL,CELL)
 VALUES (0, "wozniakmichal7@gmail.com", "+48 518-504-403");
 
-
 CREATE TABLE users(
    ID INTEGER PRIMARY KEY AUTOINCREMENT, 
 name VARCHAR(100), surname VARCHAR(100), email VARCHAR(100),
  username VARCHAR(100), password VARCHAR(100), 
  register_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
-
 
 CREATE TABLE users_additional_informations(
    ID INTEGER PRIMARY KEY, company_name VARCHAR(100),
@@ -35,6 +32,9 @@ CREATE TABLE projects(
     ID INTEGER PRIMARY KEY AUTOINCREMENT,
     user_ID INTEGER
 );
+
+CREATE INDEX projects_indexes
+on projects (ID, user_ID);
 
 CREATE TABLE projects_settings(
    ID INTEGER PRIMARY KEY,
@@ -47,5 +47,21 @@ CREATE TABLE projects_settings(
 CREATE TABLE images(
     ID INTEGER PRIMARY KEY AUTOINCREMENT,
     img_name VARCHAR(40),
+    project_ID INTEGER
+);
+
+CREATE INDEX images_names
+ON images (img_name);
+
+CREATE TABLE images_clusters(
+    ID INTEGER PRIMARY KEY,
+    clusters INTEGER
+);
+
+CREATE TABLE extra_plots(
+    ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    plot1_name VARCHAR(50),
+    plot2_name VARCHAR(50),
+    plot3_name VARCHAR(50),
     project_ID INTEGER
 );
