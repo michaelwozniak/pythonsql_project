@@ -1,14 +1,18 @@
 from flask import Flask, render_template, flash, redirect, url_for, session, request, logging
 import sqlite3
+import os
 from functools import wraps
+import string
+import random
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, TextField
 from passlib.hash import sha256_crypt
 
 app = Flask(__name__)
+APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 @app.route('/')
 def index():
-    c = sqlite3.connect('databases/content.db')
+    c = sqlite3.connect('databases/coreApp.db')
     conn = c.cursor()
     cursor = conn.execute("Select * from HOME")
     return render_template('index.html',texts=cursor)
@@ -23,7 +27,7 @@ def features_more():
 
 @app.route('/contact')
 def contact():
-    c = sqlite3.connect('databases/content.db')
+    c = sqlite3.connect('databases/coreApp.db')
     conn = c.cursor()
     cursor = conn.execute("Select * from CONTACT")
     return render_template('contact.html', texts=cursor)
@@ -121,11 +125,6 @@ def logout():
     flash('You are logged out', 'success')
     return redirect(url_for('index'))
 
-@app.route("/creator")
-@logged_in_checker
-def creator():
-    return render_template('creator.html')
-
 @app.route("/profile")
 @logged_in_checker
 def profile():
@@ -182,6 +181,36 @@ def profile_edit():
 
     return render_template('profile_edit.html', form = form)
 
+
+class CreatorForm(Form):
+    title = StringField('Title', [validators.Length(min=1, max=200)])
+    number_of_clusters = StringField('Number of clusters', [validators.Length(min=1)])
+    comments = TextAreaField("Comments", [validators.Length(min=0)])
+
+def id_generator(size=6, chars=string.ascii_uppercase + string.digits): 
+    return ''.join(random.choice(chars) for _ in range(size))
+
+@app.route("/creator",methods=["POST","GET"])
+@logged_in_checker
+def creator():
+    form = CreatorForm(request.form)
+
+
+    target = os.path.join(APP_ROOT, 'images/')
+    if not os.path.isdir(target):
+        os.mkdir(target)
+    for file in request.files.getlist("file"):
+        filename = id_generator(12) + ".png"
+        destination = "/".join([target,filename])
+        file.save(destination)
+
+    return render_template('creator.html',form = form)
+
+
+@app.route("/release")
+@logged_in_checker
+def release():
+    return render_template('release.html')
 
 if __name__ == ' __main__':
     app.secret_key = 'tomojsekretnyklucz123'

@@ -1,0 +1,2 @@
+How to build web applications in Flask: https://github.com/bradtraversy/myflaskapp
+How to upload file in efficient way: https://github.com/ibrahimokdadov/upload_file_python
