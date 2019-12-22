@@ -66,10 +66,35 @@ class Model():
         plt.savefig(foo_name)
         plt.show()
 
-    
-    
+    def sillhouette_plot(self):
+        kmeans = KMeans(n_clusters=self.number_of_clusters)
+        plt.rcParams['figure.figsize'] = [10, 5]
+        visualizer = SilhouetteVisualizer(kmeans, colors='yellowbrick')
+        visualizer.fit(self.df)
+        foo_name = "images/output/" + self.id_generator(30) + '.png'
+        self.sillhouette_name = foo_name
+        plt.title(f'Sillhouette plot based on Kmeans')
+        plt.savefig(foo_name)
+        visualizer.show()
 
-
-    
-
-    
+    def birch_model_and_plot(self):
+        birch1 = Birch(n_clusters=self.number_of_clusters, branching_factor = 50, threshold=0.5)
+        pca = PCA(n_components=2) # pca object
+        principalComponents = pca.fit_transform(self.df) #fitting dataframe to PCA
+        df_pca = pd.DataFrame(principalComponents,columns=["pc1","pc2"])
+        labels = birch1.fit_predict(self.df) #obtaining labels from model which was passed to the function
+        df_pca["cluster"] = labels #assignment of labels to nice pca dataframe
+        title = "Birch " + str(self.number_of_clusters) + "clusters"
+        cmap = sns.cubehelix_palette(dark=.3, light=.8, as_cmap=True)
+        sns.set_style("darkgrid")
+        plt.figure(figsize=(10,10))
+        plot = sns.scatterplot(df_pca.pc1,df_pca.pc2,df_pca["cluster"],s=50, palette="Set2",legend='full') #ploting results taking into account class of the image distinction
+        plot.axes.set_title(f'{title}',fontsize=20)
+        plot.set_xlabel("Component 1",fontsize=15)
+        plot.set_ylabel("Component 2",fontsize=15)
+        plot.legend(fontsize='x-large', title_fontsize='20')
+        foo_name = "images/output/" + self.id_generator(30) + '.png'
+        self.birch_name = foo_name
+        plt.savefig(foo_name)
+        plt.show()
+        return labels
