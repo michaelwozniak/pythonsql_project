@@ -2,8 +2,12 @@
 
 {% block body %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
-
+<br></br>
   <h1>Create project</h1>
+  <br></br>
+  <h4>
+    Fill in project settings:
+  </h4>
   {% from "includes/_formhelpers.html" import render_field %}
   <form method="POST" action="">
     <div class="form-group">
@@ -15,18 +19,17 @@
     <div class="form-group">
       {{ render_field(form.comments, class_="form-control", id="editor") }}
     </div>
-    <p><input class="btn btn-primary" type="submit" value="Run model">
-  </form>
-
+    <p><input class="btn btn-primary" type="submit" value="Submit settings">
+  </form><br></br>
+  <h4>
+      Upload images:
+  </h4>
   <form id="upload-form" action="{{ url_for('creator') }}" method="POST" enctype="multipart/form-data">
-
-    <strong>Files:</strong><br>
-    <input id="file-picker" type="file" name="file" accept="image/*" multiple>
-    <div id="msg"></div>
-    <input type="submit" value="Upload!" id="upload-button">
-</form>
+    <input class="btn btn-warning" id="file-picker" type="file" name="file" accept="image/input*" multiple>
+    <input class="btn btn-danger" type="submit" value="Upload!" id="upload-button">
+</form><br></br><br></br>
 </body>
-<script>
+<!-- <script>
     $("#file-picker").change(function(){
         var input = document.getElementById('file-picker');
         for (var i=0; i<input.files.length; i++)
@@ -43,7 +46,7 @@
             }
         }
     } );
-</script>
+</script> -->
 
 
 {% endblock %}

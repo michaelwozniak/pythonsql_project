@@ -43,3 +43,9 @@ CREATE TABLE projects_settings(
    comments TEXT,
    create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE images(
+    ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    img_name VARCHAR(40),
+    project_ID INTEGER
+);

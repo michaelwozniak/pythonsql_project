@@ -59,7 +59,6 @@ def signup():
         conn = c.cursor()
         conn.execute("SELECT * FROM users WHERE email = ?", (email,))
         tmp = conn.fetchall()
-        conn.close()
         if (len(tmp)!=0):
             flash("Account with this email already exist! Please sign in!","danger")
             return render_template("signup.html", form = form)
@@ -133,7 +132,7 @@ def profile():
     tmp = f"CREATE VIEW profile_view AS SELECT name, surname, username, register_date, company_name, field_of_research, phone_number,job_position FROM users as A LEFT JOIN users_additional_informations as B on B.ID = A.ID WHERE A.ID = {session.get('ID')}"
     conn.execute("DROP VIEW IF EXISTS profile_view")
     conn.execute(tmp)
-    conn.execute("select* from view_name")
+    conn.execute("select* from profile_view")
     conn.row_factory = sqlite3.Row 
     rows = conn.fetchall()
     data = dict(rows[0])
@@ -194,15 +193,41 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 @logged_in_checker
 def creator():
     form = CreatorForm(request.form)
+    if request.method == 'POST' and form.validate() == True:
+        title = form.title.data
+        number_of_clusters = form.number_of_clusters.data
+        comments = form.comments.data
+        c = sqlite3.connect('databases/coreApp.db')
+        conn = c.cursor()
+        conn.execute("INSERT INTO projects(user_ID) VALUES (?)", (session.get("ID"),))
+        c.commit()
+        conn.execute("select * from projects")
+        conn.row_factory = sqlite3.Row 
+        rows = conn.fetchall()
+        data = dict(rows[0])
+        project_id = data["ID"]
+        conn = c.cursor()
+        conn.execute("INSERT INTO projects_settings(ID, title, number_of_clusters, comments) VALUES (?,?,?,?)", (project_id,title,number_of_clusters,comments))
+        c.commit()
+        flash('Settings added!', 'success')
 
-
-    target = os.path.join(APP_ROOT, 'images/')
+    target = os.path.join(APP_ROOT, 'images/input/')
     if not os.path.isdir(target):
         os.mkdir(target)
+    controller = 0
     for file in request.files.getlist("file"):
-        filename = id_generator(12) + ".png"
-        destination = "/".join([target,filename])
-        file.save(destination)
+        filename = file.filename
+        ext = os.path.splitext(filename)[1]
+        if (ext == ".png"):
+            destination = "/".join([target,filename])
+            file.save(destination)
+            foo_name = id_generator(20) + '.png'
+            foo_destination = "/".join([target,foo_name])
+            os.rename(destination,foo_destination)
+            controller = controller + 1
+    if controller != 0:
+        flash('Images added!', 'success')
+
 
     return render_template('creator.html',form = form)
 
