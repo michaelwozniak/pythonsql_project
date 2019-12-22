@@ -1,0 +1,34 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="container">
+          <h1>Edit your profile informations</h1>
+          <br></br>
+          {% from "includes/_formhelpers.html" import render_field %}
+          <div class='box'>
+          <form method="POST" action="">
+            <div class="form-group">
+              {{render_field(form.name, class_="form-control")}}
+            </div>
+            <div class="form-group">
+              {{render_field(form.surname, class_="form-control")}}
+            </div>
+            <div class="form-group">
+              {{render_field(form.company_name, class_="form-control")}}
+            </div>
+            <div class="form-group">
+                    {{render_field(form.field_of_research, class_="form-control")}}
+                  </div>
+            <div class="form-group">
+              {{render_field(form.phone_number, class_="form-control")}}
+            </div>
+            <div class="form-group">
+              {{render_field(form.job_position, class_="form-control")}}
+            </div>
+            <p><input type="submit" class="btn btn-primary" name='btn' value="Edit it!"></p></div>
+          </form>
+      </div>
+{% endblock %}
+
+
+  

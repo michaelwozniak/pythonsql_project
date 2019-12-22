@@ -1,0 +1,46 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<h1>Profile <small> of user {{session.username}} </small></h1>
+<br></br>
+<table class="table table-dark">
+    <tbody>
+      <tr>
+        <th scope="row">Name: </th>
+        <td>{{text.name}}</td>
+      </tr>
+      <tr>
+        <th scope="row">Surname: </th>
+        <td>{{text.surname}}</td>
+      </tr>
+      <tr>
+        <th scope="row">Username: </th>
+        <td>{{text.username}}</td>
+      </tr>
+      <tr>
+        <th scope="row">Registration date: </th>
+        <td>{{text.register_date}}</td>
+      </tr>
+      <tr>
+        <th scope="row">Company name: </th>
+        <td>{{text.company_name}}</td>
+      </tr>
+      <tr>
+        <th scope="row">Field of research: </th>
+        <td>{{text.field_of_research}}</td>
+      </tr>
+      <tr>
+        <th scope="row">Phone number: </th>
+        <td>{{text.phone_number}}</td>
+      </tr>
+      <tr>
+        <th scope="row">Job position: </th>
+        <td>{{text.job_position}}</td>
+      </tr>
+    </tbody>
+  </table>
+  <!-- <br></br> -->
+  <p class="lead">
+<a href="/profile_edit" class="btn btn-lg btn-secondary">Edit your profile informations</a>
+</p>
+{% endblock %}
