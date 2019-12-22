@@ -16,3 +16,5 @@ from sklearn.metrics.cluster import adjusted_rand_score
 from sklearn.neighbors import NearestNeighbors
 from sklearn.metrics.cluster import silhouette_score
 
+class Model():
+    print("TEST")

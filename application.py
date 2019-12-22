@@ -1,11 +1,16 @@
 from flask import Flask, render_template, flash, redirect, url_for, session, request, logging
+from functools import wraps
+from wtforms import Form, StringField, TextAreaField, PasswordField, validators, TextField, DecimalField
+from passlib.hash import sha256_crypt
 import sqlite3
 import os
-from functools import wraps
+import pandas as pd
+import numpy as np
+import time
 import string
 import random
-from wtforms import Form, StringField, TextAreaField, PasswordField, validators, TextField
-from passlib.hash import sha256_crypt
+from model import Model
+
 
 app = Flask(__name__)
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -183,7 +188,7 @@ def profile_edit():
 
 class CreatorForm(Form):
     title = StringField('Title', [validators.Length(min=1, max=200)])
-    number_of_clusters = StringField('Number of clusters', [validators.Length(min=1)])
+    number_of_clusters = DecimalField('Number of clusters', [validators.NumberRange(min=2, max=10, message=' - number of classes must be in range from 2 to 10')])
     comments = TextAreaField("Comments", [validators.Length(min=0)])
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits): 
@@ -195,13 +200,13 @@ def creator():
     form = CreatorForm(request.form)
     if request.method == 'POST' and form.validate() == True:
         title = form.title.data
-        number_of_clusters = form.number_of_clusters.data
+        number_of_clusters = str(form.number_of_clusters.data)
         comments = form.comments.data
         c = sqlite3.connect('databases/coreApp.db')
         conn = c.cursor()
         conn.execute("INSERT INTO projects(user_ID) VALUES (?)", (session.get("ID"),))
         c.commit()
-        conn.execute("select * from projects")
+        conn.execute("select * from projects WHERE user_ID = ? ORDER BY ID DESC LIMIT 1;", (session.get("ID"),))
         conn.row_factory = sqlite3.Row 
         rows = conn.fetchall()
         data = dict(rows[0])
@@ -209,8 +214,13 @@ def creator():
         conn = c.cursor()
         conn.execute("INSERT INTO projects_settings(ID, title, number_of_clusters, comments) VALUES (?,?,?,?)", (project_id,title,number_of_clusters,comments))
         c.commit()
-        flash('Settings added!', 'success')
+        c.close()
+        return redirect(url_for('creator_img'))
+    return render_template('creator.html',form = form)
 
+@app.route("/creator_img",methods=["POST","GET"])
+@logged_in_checker
+def creator_img():
     target = os.path.join(APP_ROOT, 'images/input/')
     if not os.path.isdir(target):
         os.mkdir(target)
@@ -225,12 +235,24 @@ def creator():
             foo_destination = "/".join([target,foo_name])
             os.rename(destination,foo_destination)
             controller = controller + 1
+            c = sqlite3.connect('databases/coreApp.db')
+            conn = c.cursor()
+            conn.execute("select * from projects WHERE user_ID = ? ORDER BY ID DESC LIMIT 1;", (session.get("ID"),))
+            conn.row_factory = sqlite3.Row 
+            rows = conn.fetchall()
+            data = dict(rows[0])
+            project_id = data["ID"]
+            c = sqlite3.connect('databases/coreApp.db')
+            conn = c.cursor()
+            conn.execute("INSERT INTO images(img_name, project_ID) VALUES (?,?)", (foo_destination,project_id,))
+            c.commit()
+            c.close()
     if controller != 0:
         flash('Images added!', 'success')
-
-
-    return render_template('creator.html',form = form)
-
+        time.sleep(2)
+        Model()
+    
+    return render_template('creator_img.html')
 
 @app.route("/release")
 @logged_in_checker
