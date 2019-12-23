@@ -9,29 +9,12 @@
       Upload images:
   </h4>
   <p>We are accepting only png extension, other extensions will be omitted!</p>
+  <p>When our model starts his work you have to wait for results! They will be visible in Release section in around 1 minute!</p>
   <form id="upload-form" action="{{ url_for('creator_img') }}" method="POST" enctype="multipart/form-data">
     <input class="btn btn-warning" id="file-picker" type="file" name="file" accept="image/input*" multiple>
     <input class="btn btn-danger" type="submit" value="Upload images and run model!" id="upload-button">
 </form><br></br><br></br>
 </body>
-<!-- <script>
-    $("#file-picker").change(function(){
-        var input = document.getElementById('file-picker');
-        for (var i=0; i<input.files.length; i++)
-        {
-            var ext= input.files[i].name.substring(input.files[i].name.lastIndexOf('.')+1).toLowerCase()
-            if ((ext == 'png'))
-            {
-                $("#msg").text("Files are supported")
-            }
-            else
-            {
-                $("#msg").text("Files are NOT supported")
-                document.getElementById("file-picker").value ="";
-            }
-        }
-    } );
-</script> -->
 
 
 {% endblock %}

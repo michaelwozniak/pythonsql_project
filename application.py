@@ -223,6 +223,7 @@ def creator_img():
     target = os.path.join(APP_ROOT, 'images/input/')
     if not os.path.isdir(target):
         os.mkdir(target)
+
     controller = 0
     for file in request.files.getlist("file"):
         filename = file.filename
@@ -248,7 +249,6 @@ def creator_img():
             c.close()
 
     if controller != 0:
-        flash('Images added!', 'success')
         time.sleep(2)
         task = f"create view images_to_model as select img_name from images WHERE project_id = {project_id}"
         c = sqlite3.connect('databases/coreApp.db')
@@ -260,7 +260,6 @@ def creator_img():
         files_list = list()
         for i in rows:
             files_list.append(i[0])
-        flash("Model is starting his work! Results will be visible in Release in around 1 minute!")
 
         conn = c.cursor()
         conn.execute("SELECT number_of_clusters FROM projects_settings WHERE ID = ?", (project_id,))
@@ -283,7 +282,7 @@ def creator_img():
 
         for i in range(len(labels)):
             conn = c.cursor()
-            conn.execute("INSERT INTO images_clusters(ID, clusters) VALUES (?,?)", (img_tmp[i],labels[i],))
+            conn.execute("INSERT INTO images_clusters(ID, clusters) VALUES (?,?)", (img_tmp[i],int(labels[i]),))
             c.commit()
 
         conn = c.cursor()
@@ -303,7 +302,7 @@ def release():
 
 if __name__ == ' __main__':
     app.secret_key = 'tomojsekretnyklucz123'
-    app.run(threaded=False)
+    app.run(threaded=True)
 
 app.secret_key = 'tomojsekretnyklucz123'
-app.run(port=5000, debug=False,threaded=False)
+app.run(port=5000, debug=True,threaded=True)

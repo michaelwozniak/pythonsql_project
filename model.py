@@ -1,8 +1,6 @@
 from keras.preprocessing import image
 from keras.applications.inception_resnet_v2 import InceptionResNetV2
 from keras.applications.inception_resnet_v2 import preprocess_input
-import keras.backend.tensorflow_backend as tb
-tb._SYMBOLIC_SCOPE.value = True
 import numpy as np
 import glob
 import pandas as pd
@@ -76,8 +74,7 @@ class Model():
         foo_name = "images/output/" + self.id_generator(30) + '.png'
         self.sillhouette_name = foo_name
         plt.title(f'Sillhouette plot based on Kmeans')
-        plt.savefig(foo_name)
-        # visualizer.show()
+        visualizer.show(outpath=foo_name)
 
     def birch_model_and_plot(self):
         birch1 = Birch(n_clusters=self.number_of_clusters, branching_factor = 50, threshold=0.5)
