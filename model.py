@@ -62,7 +62,7 @@ class Model():
         plot.axes.set_title('PCA - dataset visualization',fontsize=20)
         plot.set_xlabel("Component 1",fontsize=15)
         plot.set_ylabel("Component 2",fontsize=15)
-        foo_name = "images/output/" + self.id_generator(30) + '.png'
+        foo_name = "static/images/output/" + self.id_generator(30) + '.png'
         self.pca_name = foo_name
         plt.savefig(foo_name)
         # plt.show()
@@ -72,7 +72,7 @@ class Model():
         plt.rcParams['figure.figsize'] = [10, 5]
         visualizer = SilhouetteVisualizer(kmeans, colors='yellowbrick')
         visualizer.fit(self.df)
-        foo_name = "images/output/" + self.id_generator(30) + '.png'
+        foo_name = "static/images/output/" + self.id_generator(30) + '.png'
         self.sillhouette_name = foo_name
         plt.title(f'Sillhouette plot based on Kmeans')
         visualizer.show(outpath=foo_name)
@@ -93,7 +93,7 @@ class Model():
         plot.set_xlabel("Component 1",fontsize=15)
         plot.set_ylabel("Component 2",fontsize=15)
         plot.legend(fontsize='x-large', title_fontsize='20')
-        foo_name = "images/output/" + self.id_generator(30) + '.png'
+        foo_name = "static/images/output/" + self.id_generator(30) + '.png'
         self.birch_name = foo_name
         plt.savefig(foo_name)
         # plt.show()

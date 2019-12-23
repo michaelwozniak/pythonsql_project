@@ -1,4 +1,4 @@
-from flask import Flask, render_template, flash, redirect, url_for, session, request, logging
+from flask import Flask, render_template, flash, redirect, url_for, session, request, logging, send_from_directory
 from functools import wraps
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, TextField, DecimalField
 from passlib.hash import sha256_crypt
@@ -221,7 +221,7 @@ def creator():
 @app.route("/creator_img",methods=["POST","GET"])
 @logged_in_checker
 def creator_img():
-    target = os.path.join(APP_ROOT, 'images/input/')
+    target = os.path.join(APP_ROOT, 'static/images/input/')
     if not os.path.isdir(target):
         os.mkdir(target)
 
@@ -305,7 +305,7 @@ def creator_img():
 def release():
     c = sqlite3.connect('databases/coreApp.db')
     conn = c.cursor()
-    command = f"CREATE VIEW dashboard as SELECT title, number_of_clusters, create_date, COUNT(c.ID) as number_of_images, hash FROM projects_settings AS a LEFT JOIN projects as b ON a.ID = b.ID left JOIN images as c ON a.ID = c.project_id LEFT JOIN extra_plots as d ON a.ID = d.project_ID WHERE user_id = {session.get('ID')} AND d.project_ID IS NOT NULL GROUP BY c.project_id ORDER BY create_date"    
+    command = f"CREATE VIEW dashboard as SELECT title, number_of_clusters, create_date, COUNT(c.ID) as number_of_images, hash FROM projects_settings AS a LEFT JOIN projects as b ON a.ID = b.ID LEFT JOIN images as c ON a.ID = c.project_id LEFT JOIN extra_plots as d ON a.ID = d.project_ID WHERE user_id = {session.get('ID')} AND d.project_ID IS NOT NULL GROUP BY c.project_id ORDER BY create_date"    
     conn.execute("DROP VIEW IF EXISTS dashboard")
     conn.execute(command)
     conn.execute("SELECT * from dashboard")
@@ -324,12 +324,22 @@ def release():
 def case(hash_id):
     c = sqlite3.connect('databases/coreApp.db')
     conn = c.cursor()
-    conn.execute("SELECT * FROM projects WHERE hash = ?", [hash_id])
+    conn.execute("SELECT name, surname, email, company_name, field_of_research, phone_number, job_position, title, number_of_clusters,comments,create_date, plot1_name, plot2_name, plot3_name, clusters , count(name) as number_of_images FROM users LEFT JOIN users_additional_informations ON users.ID = users_additional_informations.ID LEFT JOIN projects ON users.ID = projects.user_ID LEFT JOIN projects_settings ON  projects_settings.ID = projects.ID LEFT JOIN extra_plots ON extra_plots.project_ID = projects.ID LEFT JOIN images ON projects_settings.ID = images.project_ID LEFT JOIN images_clusters ON images.ID = images_clusters.ID  WHERE hash = ? GROUP BY plot1_name,clusters", [hash_id])
     conn.row_factory = sqlite3.Row 
     rows = conn.fetchall()
     data = [dict(i) for i in rows]
-    
+    _ , data[0]["plot1_name"] = data[0]["plot1_name"].split("images/output/")
+    _ , data[0]["plot2_name"] = data[0]["plot2_name"].split("images/output/")
+    _ , data[0]["plot3_name"] = data[0]["plot3_name"].split("images/output/")
+
     return render_template('case.html', case=data)
+
+target = os.path.join(APP_ROOT, 'static/images/output/')
+MEDIA_FOLDER = target
+@app.route('/uploads/<path:filename>')
+def download_file(filename):
+    print(MEDIA_FOLDER)
+    return send_from_directory(MEDIA_FOLDER, filename, as_attachment=True)
 
 
 if __name__ == ' __main__':

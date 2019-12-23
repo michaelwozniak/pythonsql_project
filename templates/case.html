@@ -1,5 +1,55 @@
 {% extends 'layout.html' %}
-{% block body %}<br></br>
-  <h1>Dashboard of results</small></h1>
+
+{% block body %}
+<br></br>
+  <h3>Summary of project: <b>{{case[0].title}}</b></h3>
+  <hr>
+  <h4>Author</h4>
+  <table class="table table-dark">
+    <tr>
+      <th>Name</th>
+      <th>Surname</th>
+      <th>Email</th>
+      <th>Company name</th>
+      <th>Field of research</th>
+      <th>Phone number</th>
+      <th>Job position</th>
+    </tr>
+      <tr>
+        <td>{{case[0].name}}</td>
+        <td>{{case[0].surname}}</td>
+        <td>{{case[0].email}}</td>
+        <td>{{case[0].company_name}}</td>
+        <td>{{case[0].field_of_research}}</td>
+        <td>{{case[0].phone_number}}</td>
+        <td>{{case[0].job_position}}</td>
+      </tr>
+  </table>
+<br></br>
+<h4>Project info</h4>
+  <table class="table table-dark">
+    <tr>
+<th>Title</th>
+<th>Number of clusters</th>
+<th>Comments</th>
+<th>Create date</th>
+    </tr>
+    <tr>
+        <td>{{case[0].title}}</td>
+        <td>{{case[0].number_of_clusters}}</td>
+        <td><div>{{case[0].comments | safe}}</div></td>
+        <td>{{case[0].create_date}}</td>
+
+    </tr>
+  </table>
+  <br></br>
+  <h4>Visualizations of clustering</h4>
+  <img src="{{ url_for('download_file', filename=case[0].plot2_name) }} ", height="75%"><br></br>
+  <br></br>
+  <img src="{{ url_for('download_file', filename=case[0].plot3_name) }} ", height="75%"><br></br>
+  <br></br>
+  <img src="{{ url_for('download_file', filename=case[0].plot1_name) }} ", height="75%"><br></br>
+  <br></br>
+
 
 {% endblock %}
