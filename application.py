@@ -185,7 +185,6 @@ def profile_edit():
 
     return render_template('profile_edit.html', form = form)
 
-
 class CreatorForm(Form):
     title = StringField('Title', [validators.Length(min=1, max=200)])
     number_of_clusters = DecimalField('Number of clusters', [validators.NumberRange(min=2, max=10, message=' - number of classes must be in range from 2 to 10')])
@@ -247,6 +246,7 @@ def creator_img():
             conn.execute("INSERT INTO images(img_name, project_ID) VALUES (?,?)", (foo_destination,project_id,))
             c.commit()
             c.close()
+
     if controller != 0:
         flash('Images added!', 'success')
         time.sleep(2)
@@ -258,9 +258,38 @@ def creator_img():
         files_list = list()
         for i in rows:
             files_list.append(i[0])
-        print(files_list)
-        # cnn_birch_model = Model(files_list)
-        # cnn_birch_model
+        flash("Model is starting his work! Results will be visible in Release in around 1 minute!")
+
+        conn.execute("SELECT number_of_clusters FROM projects_settings WHERE project_id = ?", (project_id,))
+        conn.row_factory = sqlite3.Row 
+        rows = conn.fetchall()
+        data = dict(rows[0])
+        number_of_clusters = int(data["number_of_clusters"])
+        cnn_birch_model = Model(files_list,number_of_clusters)
+        cnn_birch_model.preprocessing_images_and_model_loading()
+        cnn_birch_model.model_application()
+        cnn_birch_model.pca_plot()
+        cnn_birch_model.sillhouette_plot()
+        labels = cnn_birch_model.birch_model_and_plot()
+        conn = c.cursor()
+        conn.execute("SELECT ID FROM images WHERE project_id = ?", (project_id,))
+        rows = conn.fetchall()
+        img_tmp = list()
+        for i in rows:
+            img_tmp.append(i[0])
+
+        for i in range(len(labels)):
+            conn = c.cursor()
+            conn.execute("INSERT INTO images_clusters(ID, clusters) VALUES (?,?)", (img_tmp[i],labels[i],))
+            c.commit()
+
+        conn = c.cursor()
+        conn.execute("INSERT INTO extra_plots(plot1_name, plot2_name, plot3_name, project_ID) VALUES (?,?, ?,?)", (cnn_birch_model.sillhouette_name,cnn_birch_model.pca_name,cnn_birch_model.birch_name,project_id))
+        c.commit()
+
+        flash("Computations completed!","success")
+        time.sleep(2)
+        return redirect(url_for('release'))
     
     return render_template('creator_img.html')
 
