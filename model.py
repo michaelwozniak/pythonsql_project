@@ -1,6 +1,7 @@
 from keras.preprocessing import image
 from keras.applications.inception_resnet_v2 import InceptionResNetV2
 from keras.applications.inception_resnet_v2 import preprocess_input
+from keras.backend import clear_session
 import numpy as np
 import glob
 import pandas as pd
@@ -35,7 +36,7 @@ class Model():
                 self.preprocessed_images.update({i:img_data}) # adding img_data to dictionary for preprocessed images
             except:
                 print(f"Fatal error for {i} image")
-        
+        clear_session()
         self.model_cnn = InceptionResNetV2(weights='imagenet', include_top=False, classes=1000) #loading pre-trained model from Keras library without top layer
 
     def model_application(self):

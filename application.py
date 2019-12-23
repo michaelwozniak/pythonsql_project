@@ -149,7 +149,7 @@ class ProfileForm(Form):
     surname = StringField('Surname', [validators.Length(min=2, max=50)])
     company_name = StringField('Company name', [validators.Length(min=2, max=100)])
     field_of_research = StringField('Field of research', [validators.Length(min=2, max=100)])
-    phone_number = StringField('Phone number', [validators.Length(min=2, max=20)])
+    phone_number = StringField('Phone number', [validators.Length(min=0, max=20)])
     job_position = StringField('Job position', [validators.Length(min=2, max=100)])
 
 @app.route('/profile_edit', methods = ["GET","POST"])
@@ -203,7 +203,8 @@ def creator():
         comments = form.comments.data
         c = sqlite3.connect('databases/coreApp.db')
         conn = c.cursor()
-        conn.execute("INSERT INTO projects(user_ID) VALUES (?)", (session.get("ID"),))
+        hash_gen = id_generator(40)
+        conn.execute("INSERT INTO projects(user_ID,hash) VALUES (?,?)", (session.get("ID"),hash_gen))
         c.commit()
         conn.execute("select * from projects WHERE user_ID = ? ORDER BY ID DESC LIMIT 1;", (session.get("ID"),))
         conn.row_factory = sqlite3.Row 
@@ -267,31 +268,35 @@ def creator_img():
         rows = conn.fetchall()
         data = dict(rows[0])
         number_of_clusters = int(data["number_of_clusters"])
-        cnn_birch_model = Model(files_list,number_of_clusters)
-        cnn_birch_model.preprocessing_images_and_model_loading()
-        cnn_birch_model.model_application()
-        cnn_birch_model.pca_plot()
-        cnn_birch_model.sillhouette_plot()
-        labels = cnn_birch_model.birch_model_and_plot()
-        conn = c.cursor()
-        conn.execute("SELECT ID FROM images WHERE project_id = ?", (project_id,))
-        rows = conn.fetchall()
-        img_tmp = list()
-        for i in rows:
-            img_tmp.append(i[0])
-
-        for i in range(len(labels)):
+        try:
+            cnn_birch_model = Model(files_list,number_of_clusters)
+            cnn_birch_model.preprocessing_images_and_model_loading()
+            cnn_birch_model.model_application()
+            cnn_birch_model.pca_plot()
+            cnn_birch_model.sillhouette_plot()
+            labels = cnn_birch_model.birch_model_and_plot()
             conn = c.cursor()
-            conn.execute("INSERT INTO images_clusters(ID, clusters) VALUES (?,?)", (img_tmp[i],int(labels[i]),))
+            conn.execute("SELECT ID FROM images WHERE project_id = ?", (project_id,))
+            rows = conn.fetchall()
+            img_tmp = list()
+            for i in rows:
+                img_tmp.append(i[0])
+
+            for i in range(len(labels)):
+                conn = c.cursor()
+                conn.execute("INSERT INTO images_clusters(ID, clusters) VALUES (?,?)", (img_tmp[i],int(labels[i]),))
+                c.commit()
+
+            conn = c.cursor()
+            conn.execute("INSERT INTO extra_plots(plot1_name, plot2_name, plot3_name, project_ID) VALUES (?,?, ?,?)", (cnn_birch_model.sillhouette_name,cnn_birch_model.pca_name,cnn_birch_model.birch_name,project_id))
             c.commit()
 
-        conn = c.cursor()
-        conn.execute("INSERT INTO extra_plots(plot1_name, plot2_name, plot3_name, project_ID) VALUES (?,?, ?,?)", (cnn_birch_model.sillhouette_name,cnn_birch_model.pca_name,cnn_birch_model.birch_name,project_id))
-        c.commit()
-
-        flash("Computations completed!","success")
-        time.sleep(2)
-        return redirect(url_for('release'))
+            flash("Computations completed!","success")
+            time.sleep(2)
+            return redirect(url_for('release'))
+        except:
+            flash("Something went wrong, please try again!","danger")
+            redirect(url_for("creator"))
     
     return render_template('creator_img.html')
 
@@ -300,7 +305,7 @@ def creator_img():
 def release():
     c = sqlite3.connect('databases/coreApp.db')
     conn = c.cursor()
-    command = f"CREATE VIEW dashboard as SELECT title, number_of_clusters, create_date, COUNT(c.ID) as number_of_images FROM projects_settings AS a LEFT JOIN projects as b ON a.ID = b.ID left JOIN images as c ON a.ID = c.project_id WHERE user_id = {session.get('ID')} GROUP BY c.project_id ORDER BY create_date"    
+    command = f"CREATE VIEW dashboard as SELECT title, number_of_clusters, create_date, COUNT(c.ID) as number_of_images, hash FROM projects_settings AS a LEFT JOIN projects as b ON a.ID = b.ID left JOIN images as c ON a.ID = c.project_id LEFT JOIN extra_plots as d ON a.ID = d.project_ID WHERE user_id = {session.get('ID')} AND d.project_ID IS NOT NULL GROUP BY c.project_id ORDER BY create_date"    
     conn.execute("DROP VIEW IF EXISTS dashboard")
     conn.execute(command)
     conn.execute("SELECT * from dashboard")
@@ -310,16 +315,21 @@ def release():
     if len(data) > 0:
         return render_template('release.html', data=data)
     else:
-        msg = 'No cases has benn found'
+        msg = 'Empty! Create some projects!'
         return render_template('release.html', msg=msg)
     conn.close()
 
-@app.route('/case/<string:case_id>/')
-def article(case_id):
-    cur = mysql.connection.cursor()
-    result = cur.execute("SELECT * FROM articles WHERE id = %s", [id])
-    article = cur.fetchone()
-    return render_template('article.html', article=article)
+@app.route('/case/<string:hash_id>/')
+@logged_in_checker
+def case(hash_id):
+    c = sqlite3.connect('databases/coreApp.db')
+    conn = c.cursor()
+    conn.execute("SELECT * FROM projects WHERE hash = ?", [hash_id])
+    conn.row_factory = sqlite3.Row 
+    rows = conn.fetchall()
+    data = [dict(i) for i in rows]
+    
+    return render_template('case.html', case=data)
 
 
 if __name__ == ' __main__':

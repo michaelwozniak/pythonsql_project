@@ -10,6 +10,7 @@
   </h4>
   <p>We are accepting only png extension, other extensions will be omitted!</p>
   <p>When our model starts his work you have to wait for results! They will be visible in Release section in around 1 minute!</p>
+  <p>Please do not run next creator process before current creation will not be computed! - This will abort current and next project!</p>
   <form id="upload-form" action="{{ url_for('creator_img') }}" method="POST" enctype="multipart/form-data">
     <input class="btn btn-warning" id="file-picker" type="file" name="file" accept="image/input*" multiple>
     <input class="btn btn-danger" type="submit" value="Upload images and run model!" id="upload-button">

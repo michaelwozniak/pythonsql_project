@@ -30,7 +30,8 @@ CREATE TABLE users_additional_informations(
 
 CREATE TABLE projects(
     ID INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_ID INTEGER
+    user_ID INTEGER,
+    hash VARCHAR(50)
 );
 
 CREATE INDEX projects_indexes
