@@ -1,5 +1,24 @@
 {% extends 'layout.html' %}
 
-{% block body %}
-<h1>Control panel <small> of user {{session.username}} </small></h1>
+{% block body %}<br></br>
+  <h1>Dashboard of results</small></h1>
+  <table class="table table-dark">
+    <tr>
+      <th>Title</th>
+      <th>Clusters</th>
+      <th>Images</th>
+      <th>Date</th>
+      <th></th>
+      <th></th>
+    </tr>
+    {% for project in data %}
+      <tr>
+        <td>{{project.title}}</td>
+        <td>{{project.number_of_clusters}}</td>
+        <td>{{project.number_of_images}}</td>
+        <td>{{project.create_date}}</td>
+        <td><a href="#" class="btn btn-success pull-right">Open case</a></td>
+      </tr>
+    {% endfor %}
+  </table>
 {% endblock %}

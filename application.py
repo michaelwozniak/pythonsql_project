@@ -298,7 +298,29 @@ def creator_img():
 @app.route("/release")
 @logged_in_checker
 def release():
-    return render_template('release.html')
+    c = sqlite3.connect('databases/coreApp.db')
+    conn = c.cursor()
+    command = f"CREATE VIEW dashboard as SELECT title, number_of_clusters, create_date, COUNT(c.ID) as number_of_images FROM projects_settings AS a LEFT JOIN projects as b ON a.ID = b.ID left JOIN images as c ON a.ID = c.project_id WHERE user_id = {session.get('ID')} GROUP BY c.project_id ORDER BY create_date"    
+    conn.execute("DROP VIEW IF EXISTS dashboard")
+    conn.execute(command)
+    conn.execute("SELECT * from dashboard")
+    conn.row_factory = sqlite3.Row 
+    rows = conn.fetchall()
+    data = [dict(i) for i in rows]
+    if len(data) > 0:
+        return render_template('release.html', data=data)
+    else:
+        msg = 'No cases has benn found'
+        return render_template('release.html', msg=msg)
+    conn.close()
+
+@app.route('/case/<string:case_id>/')
+def article(case_id):
+    cur = mysql.connection.cursor()
+    result = cur.execute("SELECT * FROM articles WHERE id = %s", [id])
+    article = cur.fetchone()
+    return render_template('article.html', article=article)
+
 
 if __name__ == ' __main__':
     app.secret_key = 'tomojsekretnyklucz123'
