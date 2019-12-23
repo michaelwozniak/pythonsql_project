@@ -251,6 +251,8 @@ def creator_img():
         flash('Images added!', 'success')
         time.sleep(2)
         task = f"create view images_to_model as select img_name from images WHERE project_id = {project_id}"
+        c = sqlite3.connect('databases/coreApp.db')
+        conn = c.cursor()
         conn.execute("DROP VIEW IF EXISTS images_to_model")
         conn.execute(task)
         conn.execute("select * from images_to_model")
@@ -260,7 +262,8 @@ def creator_img():
             files_list.append(i[0])
         flash("Model is starting his work! Results will be visible in Release in around 1 minute!")
 
-        conn.execute("SELECT number_of_clusters FROM projects_settings WHERE project_id = ?", (project_id,))
+        conn = c.cursor()
+        conn.execute("SELECT number_of_clusters FROM projects_settings WHERE ID = ?", (project_id,))
         conn.row_factory = sqlite3.Row 
         rows = conn.fetchall()
         data = dict(rows[0])
@@ -300,7 +303,7 @@ def release():
 
 if __name__ == ' __main__':
     app.secret_key = 'tomojsekretnyklucz123'
-    app.run()
+    app.run(threaded=False)
 
 app.secret_key = 'tomojsekretnyklucz123'
-app.run(port=5000, debug=True)
+app.run(port=5000, debug=False,threaded=False)
