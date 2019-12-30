@@ -343,33 +343,40 @@ def case(hash_id):
     _ , data[0]["plot2_name"] = data[0]["plot2_name"].split("images/output/")
     _ , data[0]["plot3_name"] = data[0]["plot3_name"].split("images/output/")
     
-    directory = 'static/images/download/'+str(hash_id)
+    directory_main_zip = 'static/images/download/'+str(hash_id)+".zip"
+    if not os.path.exists(directory_main_zip):
+        directory = 'static/images/download/'+str(hash_id)
 
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
 
-    conn = c.cursor()
-    conn.execute("SELECT img_name, clusters FROM images LEFT JOIN images_clusters ON images.ID = images_clusters.ID \
-        LEFT JOIN projects ON images.project_ID = projects.ID WHERE hash = ?",[hash_id])
-    conn.row_factory = sqlite3.Row 
-    rows = conn.fetchall()
-    df = [dict(i) for i in rows]
-    df = pd.DataFrame(df)
+        conn = c.cursor()
+        conn.execute("SELECT img_name, clusters FROM images LEFT JOIN images_clusters ON images.ID = images_clusters.ID \
+            LEFT JOIN projects ON images.project_ID = projects.ID WHERE hash = ?",[hash_id])
+        conn.row_factory = sqlite3.Row 
+        rows = conn.fetchall()
+        df = [dict(i) for i in rows]
+        df = pd.DataFrame(df)
 
-    for i in df.clusters.unique():
-        directory_clusters = 'static/images/download/'+str(hash_id)+'/'+str(i)
-        if not os.path.exists(directory_clusters):
-            os.makedirs(directory_clusters)
+        for i in df.clusters.unique():
+            directory_clusters = 'static/images/download/'+str(hash_id)+'/'+str(i)
+            if not os.path.exists(directory_clusters):
+                os.makedirs(directory_clusters)
 
-    for i in range(len(df)):
-        _, name = df.iloc[i,1].split("//")
-        directory_photos_clusters = 'static/images/download/'+str(hash_id)+'/'+str(df.iloc[i,0])+'/'+name
-        if not os.path.exists(directory_photos_clusters):
-            shutil.copy(df.iloc[i,1], directory_photos_clusters)
+        for i in range(len(df)):
+            _, name = df.iloc[i,1].split("//")
+            directory_photos_clusters = 'static/images/download/'+str(hash_id)+'/'+str(df.iloc[i,0])+'/'+name
+            if not os.path.exists(directory_photos_clusters):
+                shutil.copy(df.iloc[i,1], directory_photos_clusters)
 
+        directory_zip = "static/images/download/" + str(hash_id)
+        output_file_zip = "static/images/download/" + str(hash_id)
+        if not os.path.exists(f'{directory_zip}.zip'):
+            shutil.make_archive(output_file_zip, 'zip', directory_zip)
 
-
-    
+        shutil.rmtree(directory_zip)
+    to_dict = "static/images/download/" + str(hash_id)+".zip"
+    data[0].update({"project_id_hash":to_dict})
 
     return render_template('case.html', case=data)
 
@@ -381,7 +388,7 @@ def display_img(filename):
 
 
 MEDIA_FOLDER_2 = os.path.join(APP_ROOT, 'static/images/download/')
-@app.route('/uploads/<path:filename>')
+@app.route('/<path:filename>')
 @logged_in_checker
 def download_files(filename):
     return send_from_directory(MEDIA_FOLDER_2, filename, as_attachment=True)
