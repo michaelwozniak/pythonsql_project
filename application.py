@@ -9,6 +9,7 @@ import numpy as np
 import time
 import string
 import random
+import shutil
 from model import Model
 
 
@@ -134,7 +135,8 @@ def logout():
 def profile():
     c = sqlite3.connect('databases/coreApp.db')
     conn = c.cursor()
-    tmp = f"CREATE VIEW profile_view AS SELECT name, surname, username, register_date, company_name, field_of_research, phone_number,job_position FROM users as A LEFT JOIN users_additional_informations as B on B.ID = A.ID WHERE A.ID = {session.get('ID')}"
+    tmp = f"CREATE VIEW profile_view AS SELECT name, surname, username, register_date, company_name, field_of_research, \
+        phone_number,job_position FROM users as A LEFT JOIN users_additional_informations as B on B.ID = A.ID WHERE A.ID = {session.get('ID')}"
     conn.execute("DROP VIEW IF EXISTS profile_view")
     conn.execute(tmp)
     conn.execute("select* from profile_view")
@@ -221,7 +223,7 @@ def creator():
 @app.route("/creator_img",methods=["POST","GET"])
 @logged_in_checker
 def creator_img():
-    target = os.path.join(APP_ROOT, 'static/images/input/')
+    target = 'static/images/input/'
     if not os.path.isdir(target):
         os.mkdir(target)
 
@@ -305,7 +307,10 @@ def creator_img():
 def release():
     c = sqlite3.connect('databases/coreApp.db')
     conn = c.cursor()
-    command = f"CREATE VIEW dashboard as SELECT title, number_of_clusters, create_date, COUNT(c.ID) as number_of_images, hash FROM projects_settings AS a LEFT JOIN projects as b ON a.ID = b.ID LEFT JOIN images as c ON a.ID = c.project_id LEFT JOIN extra_plots as d ON a.ID = d.project_ID WHERE user_id = {session.get('ID')} AND d.project_ID IS NOT NULL GROUP BY c.project_id ORDER BY create_date"    
+    command = f"CREATE VIEW dashboard as SELECT title, number_of_clusters, create_date, COUNT(c.ID) as number_of_images,\
+         hash FROM projects_settings AS a LEFT JOIN projects as b ON a.ID = b.ID LEFT JOIN images as c ON a.ID = c.project_id\
+              LEFT JOIN extra_plots as d ON a.ID = d.project_ID WHERE user_id = {session.get('ID')} AND d.project_ID IS\
+                   NOT NULL GROUP BY c.project_id ORDER BY create_date"    
     conn.execute("DROP VIEW IF EXISTS dashboard")
     conn.execute(command)
     conn.execute("SELECT * from dashboard")
@@ -324,22 +329,62 @@ def release():
 def case(hash_id):
     c = sqlite3.connect('databases/coreApp.db')
     conn = c.cursor()
-    conn.execute("SELECT name, surname, email, company_name, field_of_research, phone_number, job_position, title, number_of_clusters,comments,create_date, plot1_name, plot2_name, plot3_name, clusters , count(name) as number_of_images FROM users LEFT JOIN users_additional_informations ON users.ID = users_additional_informations.ID LEFT JOIN projects ON users.ID = projects.user_ID LEFT JOIN projects_settings ON  projects_settings.ID = projects.ID LEFT JOIN extra_plots ON extra_plots.project_ID = projects.ID LEFT JOIN images ON projects_settings.ID = images.project_ID LEFT JOIN images_clusters ON images.ID = images_clusters.ID  WHERE hash = ? GROUP BY plot1_name,clusters", [hash_id])
+    conn.execute("SELECT name, surname, email, company_name, field_of_research, phone_number, job_position,\
+         title, number_of_clusters,comments,create_date, plot1_name, plot2_name, plot3_name, clusters , \
+             count(name) as number_of_images FROM users LEFT JOIN users_additional_informations ON \
+                 users.ID = users_additional_informations.ID LEFT JOIN projects ON users.ID = projects.user_ID LEFT JOIN projects_settings\
+                      ON  projects_settings.ID = projects.ID LEFT JOIN extra_plots ON extra_plots.project_ID = projects.ID \
+                          LEFT JOIN images ON projects_settings.ID = images.project_ID LEFT JOIN images_clusters ON \
+                              images.ID = images_clusters.ID  WHERE hash = ? GROUP BY plot1_name,clusters", [hash_id])
     conn.row_factory = sqlite3.Row 
     rows = conn.fetchall()
     data = [dict(i) for i in rows]
     _ , data[0]["plot1_name"] = data[0]["plot1_name"].split("images/output/")
     _ , data[0]["plot2_name"] = data[0]["plot2_name"].split("images/output/")
     _ , data[0]["plot3_name"] = data[0]["plot3_name"].split("images/output/")
+    
+    directory = 'static/images/download/'+str(hash_id)
+
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    conn = c.cursor()
+    conn.execute("SELECT img_name, clusters FROM images LEFT JOIN images_clusters ON images.ID = images_clusters.ID \
+        LEFT JOIN projects ON images.project_ID = projects.ID WHERE hash = ?",[hash_id])
+    conn.row_factory = sqlite3.Row 
+    rows = conn.fetchall()
+    df = [dict(i) for i in rows]
+    df = pd.DataFrame(df)
+
+    for i in df.clusters.unique():
+        directory_clusters = 'static/images/download/'+str(hash_id)+'/'+str(i)
+        if not os.path.exists(directory_clusters):
+            os.makedirs(directory_clusters)
+
+    for i in range(len(df)):
+        _, name = df.iloc[i,1].split("//")
+        directory_photos_clusters = 'static/images/download/'+str(hash_id)+'/'+str(df.iloc[i,0])+'/'+name
+        if not os.path.exists(directory_photos_clusters):
+            shutil.copy(df.iloc[i,1], directory_photos_clusters)
+
+
+
+    
 
     return render_template('case.html', case=data)
 
-target = os.path.join(APP_ROOT, 'static/images/output/')
-MEDIA_FOLDER = target
+MEDIA_FOLDER_1 = os.path.join(APP_ROOT, 'static/images/output/')
 @app.route('/uploads/<path:filename>')
-def download_file(filename):
-    print(MEDIA_FOLDER)
-    return send_from_directory(MEDIA_FOLDER, filename, as_attachment=True)
+@logged_in_checker
+def display_img(filename):
+    return send_from_directory(MEDIA_FOLDER_1, filename, as_attachment=True)
+
+
+MEDIA_FOLDER_2 = os.path.join(APP_ROOT, 'static/images/download/')
+@app.route('/uploads/<path:filename>')
+@logged_in_checker
+def download_files(filename):
+    return send_from_directory(MEDIA_FOLDER_2, filename, as_attachment=True)
 
 
 if __name__ == ' __main__':
