@@ -20,10 +20,10 @@ import string
 import random
 
 class Model():
-    def __init__(self,files_list,number_of_clusters):
+    def __init__(self,files_list,number_of_clusters,model):
         self.files_list = files_list 
         self.number_of_clusters = number_of_clusters
-    
+        self.model_cnn = model
     def preprocessing_images_and_model_loading(self):
         self.preprocessed_images = dict() 
         for i in self.files_list:
@@ -36,8 +36,8 @@ class Model():
                 self.preprocessed_images.update({i:img_data}) # adding img_data to dictionary for preprocessed images
             except:
                 print(f"Fatal error for {i} image")
-        clear_session()
-        self.model_cnn = InceptionResNetV2(weights='imagenet', include_top=False, classes=1000) #loading pre-trained model from Keras library without top layer
+        # clear_session()
+        # self.model_cnn = InceptionResNetV2(weights='imagenet', include_top=False, classes=1000) #loading pre-trained model from Keras library without top layer
 
     def model_application(self):
         self.extracted_features = dict() # dictionary for extracted features for each image

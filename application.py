@@ -11,7 +11,12 @@ import string
 import random
 import shutil
 from model import Model
+import tensorflow as tf
+from keras.applications.inception_resnet_v2 import InceptionResNetV2
 
+global graph
+graph = tf.get_default_graph()
+model = InceptionResNetV2(weights='imagenet', include_top=False, classes=1000) 
 
 app = Flask(__name__)
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -271,12 +276,13 @@ def creator_img():
         data = dict(rows[0])
         number_of_clusters = int(data["number_of_clusters"])
         try:
-            cnn_birch_model = Model(files_list,number_of_clusters)
-            cnn_birch_model.preprocessing_images_and_model_loading()
-            cnn_birch_model.model_application()
-            cnn_birch_model.pca_plot()
-            cnn_birch_model.sillhouette_plot()
-            labels = cnn_birch_model.birch_model_and_plot()
+            with graph.as_default():
+                cnn_birch_model = Model(files_list,number_of_clusters,model)
+                cnn_birch_model.preprocessing_images_and_model_loading()
+                cnn_birch_model.model_application()
+                cnn_birch_model.pca_plot()
+                cnn_birch_model.sillhouette_plot()
+                labels = cnn_birch_model.birch_model_and_plot()
             conn = c.cursor()
             conn.execute("SELECT ID FROM images WHERE project_id = ?", (project_id,))
             rows = conn.fetchall()
