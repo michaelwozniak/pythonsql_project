@@ -14,6 +14,7 @@ from model import Model
 import tensorflow as tf
 from keras.applications.inception_resnet_v2 import InceptionResNetV2
 
+# deep learning init for multithreading in flask
 global graph
 graph = tf.get_default_graph()
 model = InceptionResNetV2(weights='imagenet', include_top=False, classes=1000) 
@@ -25,7 +26,7 @@ APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 def index():
     c = sqlite3.connect('databases/coreApp.db')
     conn = c.cursor()
-    cursor = conn.execute("Select * from HOME")
+    cursor = conn.execute("SELECT * from HOME")
     return render_template('index.html',texts=cursor)
 
 @app.route('/features')
@@ -40,7 +41,7 @@ def features_more():
 def contact():
     c = sqlite3.connect('databases/coreApp.db')
     conn = c.cursor()
-    cursor = conn.execute("Select * from CONTACT")
+    cursor = conn.execute("SELECT * from CONTACT")
     return render_template('contact.html', texts=cursor)
 
 class RegisterForm(Form):
@@ -144,7 +145,7 @@ def profile():
         phone_number,job_position FROM users as A LEFT JOIN users_additional_informations as B on B.ID = A.ID WHERE A.ID = {session.get('ID')}"
     conn.execute("DROP VIEW IF EXISTS profile_view")
     conn.execute(tmp)
-    conn.execute("select* from profile_view")
+    conn.execute("SELECT * FROM profile_view")
     conn.row_factory = sqlite3.Row 
     rows = conn.fetchall()
     data = dict(rows[0])
@@ -179,13 +180,15 @@ def profile_edit():
         tmp = conn.fetchall()
         if (len(tmp) != 0):
             conn = c.cursor()
-            conn.execute("UPDATE users_additional_informations SET company_name = ?, field_of_research = ?, phone_number = ?, job_position = ? WHERE ID = ?", (company_name,field_of_research,phone_number,job_position, session.get("ID"),))
+            conn.execute("UPDATE users_additional_informations SET company_name = ?, field_of_research = ?,\
+                 phone_number = ?, job_position = ? WHERE ID = ?", (company_name,field_of_research,phone_number,job_position, session.get("ID"),))
             c.commit()
             conn.close()
             return redirect(url_for('profile'))
         else:
             conn = c.cursor()
-            conn.execute("INSERT INTO users_additional_informations (ID, company_name, field_of_research, phone_number , job_position) VALUES (?,?,?,?,?)", (session.get("ID"),company_name,field_of_research,phone_number,job_position,))
+            conn.execute("INSERT INTO users_additional_informations (ID, company_name, field_of_research, \
+                phone_number , job_position) VALUES (?,?,?,?,?)", (session.get("ID"),company_name,field_of_research,phone_number,job_position,))
             c.commit()
             conn.close()
             return redirect(url_for('profile'))
@@ -399,10 +402,11 @@ MEDIA_FOLDER_2 = os.path.join(APP_ROOT, 'static/images/download/')
 def download_files(filename):
     return send_from_directory(MEDIA_FOLDER_2, filename, as_attachment=True)
 
-
+#run of linux machine
 if __name__ == ' __main__':
     app.secret_key = 'tomojsekretnyklucz123'
     app.run(threaded=True)
 
+#run on widnows machine
 app.secret_key = 'tomojsekretnyklucz123'
 app.run(port=5000, debug=True,threaded=True)
