@@ -1,5 +1,5 @@
 #flask libraries
-Flask==1.1.1
+Flask==2.3.2
 Flask-RESTful==0.3.7
 Flask-WTF==0.14.2
 #forms in html for flask
